@@ -9,6 +9,7 @@
     "dev:sync": "ts-node src/jobs/syncShows.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "dotenv": "^17.3.1",
     "pg": "^8.12.0"
   },
