@@ -1,0 +1,21 @@
+{
+  "name": "drama-sync-tvmaze",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/jobs/syncShows.js",
+  "scripts": {
+    "build": "tsc",
+    "sync": "node dist/jobs/syncShows.js",
+    "dev:sync": "ts-node src/jobs/syncShows.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.16.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0"
+  }
+}
