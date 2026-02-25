@@ -51,11 +51,6 @@ async function main() {
     .filter(([id, ts]) => {
       const numTs = Number(ts);
       const ok = numTs >= since;
-      if (!ok) {
-        console.log(
-          `Skipping from entries: show ${id} with old ts ${numTs} < since ${since}`
-        );
-      }
       return ok;
     });
 
