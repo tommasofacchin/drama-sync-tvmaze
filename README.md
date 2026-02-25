@@ -4,6 +4,8 @@ This is a Node.js/TypeScript job that keeps a Supabase/PostgreSQL database of Ko
 
 It daily pulls updated shows from the TVMaze API, filters for K‑dramas, and upserts shows, genres and cast information into the database. The script is designed to run both locally and on a schedule via GitHub Actions.
 
+---
+
 ## Tech stack
 
 - Node.js + TypeScript
@@ -11,6 +13,8 @@ It daily pulls updated shows from the TVMaze API, filters for K‑dramas, and up
 - TVMaze public API
 - `@supabase/supabase-js` for database access
 - GitHub Actions workflow for scheduled runs
+
+---
 
 ## Project structure
 
@@ -37,6 +41,8 @@ drama-sync-tvmaze/
 └─ README.md
 ```
 
+---
+
 ## How the sync works
 
 1. Read the sync state for the `tvmaze_shows` source from the database.
@@ -50,6 +56,8 @@ drama-sync-tvmaze/
    - upsert its genres and the `drama_genre` relations
    - fetch the cast, upsert actors and `drama_actor` relations
 5. Track the maximum timestamp seen in the batch and persist it back to `sync_state` as the new `last_since`.
+
+---
 
 ## Configuration
 
