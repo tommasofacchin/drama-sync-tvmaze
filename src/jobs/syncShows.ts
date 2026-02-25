@@ -45,6 +45,7 @@ async function main() {
   console.log("Fetching updates since", since);
 
   const updatesMap = await fetchUpdatedShowIdsSince(since);
+  console.log("Fetched updates from TVMaze:", updatesMap);
   const entries = Object.entries(updatesMap);
   console.log("Updated shows count:", entries.length);
 
