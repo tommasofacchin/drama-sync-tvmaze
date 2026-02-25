@@ -64,7 +64,8 @@ async function main() {
 
   
   for (const [index, id] of limitIds.entries()) {
-    console.log(`Processing show ${id} (${index + 1}/${limitIds.length})`);
+    const ts = updatesMap[id.toString()];
+    console.log(`Processing show ${id} (${index + 1}/${limitIds.length}) updated at timestamp: ${ts}`);
 
     if (index > 0) {
         await sleep(DELAY_MS);
@@ -73,7 +74,6 @@ async function main() {
     const show = await fetchShowById(id);
     const row = mapTvmazeShowToDramaRow(show);
 
-    const ts = updatesMap[id.toString()];
     if (ts && ts > batchMaxSince) {
         batchMaxSince = ts;
     }
@@ -86,7 +86,6 @@ async function main() {
 
     const dramaId = await upsertDrama(row);
 
-    // === generi ===
     const genres = show.genres ?? [];
     const dramaGenreRows: DramaGenreRow[] = [];
     const seenGenres = new Set<string>();
