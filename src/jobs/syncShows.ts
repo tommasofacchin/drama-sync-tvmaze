@@ -43,12 +43,41 @@ async function main() {
     state.last_since ?? Math.floor(Date.now() / 1000) - 24 * 3600;
 
   console.log("Fetching updates since", since);
-
+  
   const updatesMap = await fetchUpdatedShowIdsSince(since);
-  //const entries = Object.entries(updatesMap);
-  //console.log("Updated shows count:", entries.length);
+  console.log("Raw updates count:", Object.keys(updatesMap).length);
 
-  const filteredUpdates = Object.entries(updatesMap).filter(([id, timestamp]) => timestamp >= since);
+  const entries = Object.entries(updatesMap)
+    .filter(([id, ts]) => {
+      const numTs = Number(ts);
+      const ok = numTs >= since;
+      if (!ok) {
+        console.log(
+          `Skipping from entries: show ${id} with old ts ${numTs} < since ${since}`
+        );
+      }
+      return ok;
+    });
+
+  if (entries.length === 0) {
+    console.log("No updates, keeping last_since =", since);
+    return;
+  }
+  
+  console.log("Filtered updates count:", entries.length);
+  entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+
+  const limitEntries = entries.slice(0, BATCH_SIZE);
+  const limitIds = limitEntries.map(([id]) => Number(id));
+  
+  console.log("Will process these IDs (id, ts):", limitEntries);
+  
+  let processed = 0;
+  let processedKdrama = 0;
+  let batchMaxSince = since;
+  
+
+  /*const filteredUpdates = Object.entries(updatesMap).filter(([id, timestamp]) => timestamp >= since);
   console.log("Filtered updates:", filteredUpdates);
   
   const entries = filteredUpdates;
@@ -72,13 +101,29 @@ async function main() {
 
   let processed = 0;
   let processedKdrama = 0;
-  let batchMaxSince = since;
+  let batchMaxSince = since;*/
 
   
   for (const [index, id] of limitIds.entries()) {
-    const ts = updatesMap[id.toString()];
+    /*const ts = updatesMap[id.toString()];
     console.log(`Processing show ${id} (${index + 1}/${limitIds.length}) updated at timestamp: ${ts}`);
+*/
 
+    const ts = Number(
+      limitEntries.find(([entryId]) => Number(entryId) === id)![1]
+    );
+  
+    if (ts < since) {
+      console.warn(
+        `FATAL: about to process show ${id} with ts ${ts} < since ${since}`
+      );
+      continue;
+    }
+  
+    console.log(
+      `Processing show ${id} (${index + 1}/${limitIds.length}) updated at timestamp: ${ts}`
+    );
+      
     if (index > 0) {
         await sleep(DELAY_MS);
     }
