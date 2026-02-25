@@ -60,7 +60,8 @@ async function main() {
   }
   
   console.log("Filtered updates count:", entries.length);
-  entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+  //entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+  entries.sort((a, b) => Number(a[1]) - Number(b[1]));
 
   const limitEntries = entries.slice(0, BATCH_SIZE);
   const limitIds = limitEntries.map(([id]) => Number(id));
@@ -69,39 +70,7 @@ async function main() {
   let processedKdrama = 0;
   let batchMaxSince = since;
   
-
-  /*const filteredUpdates = Object.entries(updatesMap).filter(([id, timestamp]) => timestamp >= since);
-  console.log("Filtered updates:", filteredUpdates);
-  
-  const entries = filteredUpdates;
-  console.log("Updated shows count:", entries.length);
-  
-  if (entries.length === 0) {
-    console.log("No updates, keeping last_since =", since);
-    return;
-  }
-
-  if (entries.length === 0) {
-    console.log("No updates, keeping last_since =", since);
-    return;
-  }
-
-  //entries.sort((a, b) => a[1] - b[1]);
-  entries.sort((a, b) => b[1] - a[1]);
-
-  const ids = entries.map(([id]) => Number(id));
-  const limitIds = ids.slice(0, BATCH_SIZE);
-
-  let processed = 0;
-  let processedKdrama = 0;
-  let batchMaxSince = since;*/
-
-  
   for (const [index, id] of limitIds.entries()) {
-    /*const ts = updatesMap[id.toString()];
-    console.log(`Processing show ${id} (${index + 1}/${limitIds.length}) updated at timestamp: ${ts}`);
-*/
-
     const ts = Number(
       limitEntries.find(([entryId]) => Number(entryId) === id)![1]
     );
