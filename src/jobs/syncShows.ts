@@ -30,7 +30,7 @@ import {
 
 
 const SOURCE = "tvmaze_shows";
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : 1000;
 const MAX_REQ_PER_WINDOW = 50;
 const WINDOW_MS = 10_000; 
 const DELAY_MS = Math.ceil(WINDOW_MS / MAX_REQ_PER_WINDOW);
