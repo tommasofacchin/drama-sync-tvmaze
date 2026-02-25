@@ -45,9 +45,19 @@ async function main() {
   console.log("Fetching updates since", since);
 
   const updatesMap = await fetchUpdatedShowIdsSince(since);
-  console.log("Fetched updates from TVMaze:", updatesMap);
-  const entries = Object.entries(updatesMap);
+  //const entries = Object.entries(updatesMap);
+  //console.log("Updated shows count:", entries.length);
+
+  const filteredUpdates = Object.entries(updatesMap).filter(([id, timestamp]) => timestamp >= since);
+  console.log("Filtered updates:", filteredUpdates);
+  
+  const entries = filteredUpdates;
   console.log("Updated shows count:", entries.length);
+  
+  if (entries.length === 0) {
+    console.log("No updates, keeping last_since =", since);
+    return;
+  }
 
   if (entries.length === 0) {
     console.log("No updates, keeping last_since =", since);
