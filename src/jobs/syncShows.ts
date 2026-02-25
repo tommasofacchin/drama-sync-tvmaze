@@ -64,7 +64,8 @@ async function main() {
     return;
   }
 
-  entries.sort((a, b) => a[1] - b[1]);
+  //entries.sort((a, b) => a[1] - b[1]);
+  entries.sort((a, b) => b[1] - a[1]);
 
   const ids = entries.map(([id]) => Number(id));
   const limitIds = ids.slice(0, BATCH_SIZE);
