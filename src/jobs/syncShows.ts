@@ -65,8 +65,6 @@ async function main() {
   const limitEntries = entries.slice(0, BATCH_SIZE);
   const limitIds = limitEntries.map(([id]) => Number(id));
   
-  console.log("Will process these IDs (id, ts):", limitEntries);
-  
   let processed = 0;
   let processedKdrama = 0;
   let batchMaxSince = since;
