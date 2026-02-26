@@ -13,6 +13,8 @@ import {
   fetchUpdatedShowIdsSince,
   fetchShowById,
   fetchShowCast,
+  fetchShowEpisodes,        
+  fetchEpisodeGuestCast,
 } from "../tvmaze/client";
 import {
   mapTvmazePersonToActorRow,
@@ -34,6 +36,7 @@ const BATCH_SIZE = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : 1
 const MAX_REQ_PER_WINDOW = 50;
 const WINDOW_MS = 10_000; 
 const DELAY_MS = Math.ceil(WINDOW_MS / MAX_REQ_PER_WINDOW);
+const EPISODE_DELAY_MS = 200;
 
 async function main() {
   console.log("Running drama-sync-tvmaze job...");
@@ -60,7 +63,6 @@ async function main() {
   }
   
   console.log("Filtered updates count:", entries.length);
-  //entries.sort((a, b) => Number(b[1]) - Number(a[1]));
   entries.sort((a, b) => Number(a[1]) - Number(b[1]));
 
   const limitEntries = entries.slice(0, BATCH_SIZE);
@@ -103,6 +105,11 @@ async function main() {
         continue;
     }
 
+    
+    console.log(
+      `Processing show ${id} - "${row.title}"`
+    );
+
     const dramaId = await upsertDrama(row);
 
     const genres = show.genres ?? [];
@@ -110,13 +117,13 @@ async function main() {
     const seenGenres = new Set<string>();
 
     for (const g of genres) {
-    if (!g) continue;
-    const name = g.trim();
-    if (!name || seenGenres.has(name)) continue;
-    seenGenres.add(name);
-
-    const genreId = await upsertGenre({ name });
-    dramaGenreRows.push({ drama_id: dramaId, genre_id: genreId });
+      if (!g) continue;
+      const name = g.trim();
+      if (!name || seenGenres.has(name)) continue;
+      seenGenres.add(name);
+  
+      const genreId = await upsertGenre({ name });
+      dramaGenreRows.push({ drama_id: dramaId, genre_id: genreId });
     }
 
     await upsertDramaGenres(dramaGenreRows);
@@ -125,29 +132,62 @@ async function main() {
     processedKdrama++;
 
     const castItems = await fetchShowCast(id);
+    const episodes = await fetchShowEpisodes(id);
+    const guestCastItemsAll: typeof castItems = [];
+
+    for (const ep of episodes) {
+      await sleep(EPISODE_DELAY_MS);
+      const episodeGuestCast = await fetchEpisodeGuestCast(ep.id); // /episodes/:id/guestcast
+      guestCastItemsAll.push(...episodeGuestCast);
+    }
+
+    const allCastItems = [...castItems, ...guestCastItemsAll];
+    const byPerson = new Map<number, { item: any; isGuest: boolean }>();
+
+    for (const item of castItems) {
+      const pid = item.person.id;
+      if (!byPerson.has(pid)) {
+        byPerson.set(pid, { item, isGuest: false });
+      }
+    }
+
+    for (const item of guestCastItemsAll) {
+      const pid = item.person.id;
+      if (!byPerson.has(pid)) {
+        byPerson.set(pid, { item, isGuest: true });
+      }
+    }
 
     const dramaActorRows: DramaActorRow[] = [];
     const seen = new Set<string>();
 
-    for (let i = 0; i < castItems.length; i++) {
-    const item = castItems[i];
-    const actorRow = mapTvmazePersonToActorRow(item.person);
-    const actorId = await upsertActor(actorRow);
+    console.log(`drama: ${row.title}`);
 
-    const key = `${dramaId}-${actorId}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    let order = 0;
+    for (const { item, isGuest } of byPerson.values()) {
+      const actorRow = mapTvmazePersonToActorRow(item.person);
+      const actorId = await upsertActor(actorRow);
 
-    dramaActorRows.push(
-        mapTvmazeCastItemToDramaActorRow(dramaId, actorId, item, i)
-    );
+      const key = `${dramaId}-${actorId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const dar = mapTvmazeCastItemToDramaActorRow(
+        dramaId,
+        actorId,
+        item,
+        order
+      );
+      dramaActorRows.push(dar);
+
+      const label = isGuest ? "guest cast" : "cast";
+      console.log(` - ${label}: ${actorRow.name}`);
+
+      order++;
     }
-
 
     await upsertDramaActors(dramaActorRows);
     }
-
-
 
   const newLastSince = batchMaxSince;
   await updateSyncState(SOURCE, newLastSince);
