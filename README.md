@@ -49,12 +49,14 @@ drama-sync-tvmaze/
 2. Call the TVMaze updates endpoint with `since = last_since` to get all show IDs that changed after that timestamp.
 3. Filter and sort the updates by timestamp.
 4. Process the first `BATCH_SIZE` entries in ascending order of timestamp:
-   - fetch full show details
-   - map to the local `drama` schema
-   - skip anything that is not a K‑drama
-   - upsert the drama
-   - upsert its genres and the `drama_genre` relations
-   - fetch the cast, upsert actors and `drama_actor` relations
+   - fetch full show details  
+   - map to the local `drama` schema  
+   - skip anything that is not a K‑drama  
+   - upsert the drama  
+   - upsert its genres and the `drama_genre` relations  
+   - fetch the show‑level cast, upsert actors and `drama_actor` relations  
+   - fetch all episodes for the show and, for each episode, fetch the guest cast  
+   - merge main cast and guest cast, deduplicate by person, and upsert any additional actors and `drama_actor` relations
 5. Track the maximum timestamp seen in the batch and persist it back to `sync_state` as the new `last_since`.
 
 ---
@@ -75,3 +77,7 @@ The database schema includes:
 - `genre`  
 - `drama_genre`  
 - `sync_state` 
+
+---
+
+ > Data and images are provided by [TVmaze.com](https://www.tvmaze.com) and are licensed under [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/).
