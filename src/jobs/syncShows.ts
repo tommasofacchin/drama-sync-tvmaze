@@ -28,6 +28,11 @@ import {
   upsertDramaGenres,
   DramaGenreRow,
 } from "../db/genre";
+import {
+  mapTvmazeEpisodeToEpisodeRow,
+  upsertEpisodes,
+  EpisodeRow,
+} from "../db/episode";
 
 
 
@@ -133,6 +138,12 @@ async function main() {
 
     const castItems = await fetchShowCast(id);
     const episodes = await fetchShowEpisodes(id);
+    const episodeRows: EpisodeRow[] = episodes
+      .map((episode) => mapTvmazeEpisodeToEpisodeRow(dramaId, episode))
+      .filter((row): row is EpisodeRow => row !== null);
+
+    await upsertEpisodes(episodeRows);
+
     const guestCastItemsAll: typeof castItems = [];
 
     for (const ep of episodes) {

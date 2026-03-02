@@ -22,6 +22,7 @@ export type TvmazeEpisode = {
   season: number;
   number: number;
   airdate?: string | null;
+  summary?: string | null;
 };
 
 export async function fetchUpdatedShowIdsSinceDay(): Promise<number[]> {
