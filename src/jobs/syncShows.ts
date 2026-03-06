@@ -98,6 +98,12 @@ async function main() {
     }
 
     const show = await fetchShowById(id);
+
+    if (!show) {
+      if (ts && ts > batchMaxSince) batchMaxSince = ts;
+      continue;
+    }
+    
     const row = mapTvmazeShowToDramaRow(show);
 
     if (ts && ts > batchMaxSince) {
