@@ -35,19 +35,22 @@ export async function fetchUpdatedShowIdsSinceDay(): Promise<number[]> {
   return Object.keys(data).map((id) => Number(id));
 }
 
-export async function fetchShowById(id: number): Promise<TvmazeShow> {
+export async function fetchShowById(id: number): Promise<TvmazeShow | null> {
   const url = `${TVMAZE_BASE_URL}/shows/${id}`;
   const res = await fetch(url);
-  
+
   if (res.status === 404) {
     console.warn(`TVMaze show ${id} not found (404), skipping`);
     return null;
   }
-  
+
   if (!res.ok) {
-    throw new Error(`TVMaze show ${id} error ${res.status}: ${await res.text()}`);
+    throw new Error(
+      `TVMaze show ${id} error ${res.status}: ${await res.text()}`
+    );
   }
-  return res.json();
+
+  return res.json() as Promise<TvmazeShow>;
 }
 
 
