@@ -34,6 +34,12 @@ export function mapTvmazeEpisodeToEpisodeRow(
 
 export async function upsertEpisodes(rows: EpisodeRow[]): Promise<void> {
   if (rows.length === 0) return;
+  
+  rows.forEach((r) => {
+    if (r.airdate === "" as any) {
+      console.error("BUG: empty string airdate", r);
+    }
+  });
 
   const { error } = await supabase
     .from("episode")
@@ -41,3 +47,4 @@ export async function upsertEpisodes(rows: EpisodeRow[]): Promise<void> {
 
   if (error) throw error;
 }
+
