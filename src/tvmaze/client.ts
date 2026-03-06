@@ -38,6 +38,12 @@ export async function fetchUpdatedShowIdsSinceDay(): Promise<number[]> {
 export async function fetchShowById(id: number): Promise<TvmazeShow> {
   const url = `${TVMAZE_BASE_URL}/shows/${id}`;
   const res = await fetch(url);
+  
+  if (res.status === 404) {
+    console.warn(`TVMaze show ${id} not found (404), skipping`);
+    return null;
+  }
+  
   if (!res.ok) {
     throw new Error(`TVMaze show ${id} error ${res.status}: ${await res.text()}`);
   }
