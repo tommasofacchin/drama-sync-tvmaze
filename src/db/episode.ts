@@ -22,12 +22,17 @@ export function mapTvmazeEpisodeToEpisodeRow(
     return null;
   }
 
+  const airdate =
+    episode.airdate && episode.airdate.trim() !== ""
+      ? episode.airdate
+      : null;
+
   return {
     drama_id: dramaId,
     name: episode.name,
     season: episode.season,
     number: episode.number,
-    airdate: episode.airdate ?? null,
+    airdate: airdate,
     summary: episode.summary ?? null,
   };
 }
