@@ -30,9 +30,16 @@ async function upsertEpisodes(rows) {
             console.error("BUG: empty string airdate", r);
         }
     });
+    const dedupedRows = Array.from(rows
+        .reduce((acc, row) => {
+        const key = `${row.drama_id}:${row.season}:${row.number}`;
+        acc.set(key, row);
+        return acc;
+    }, new Map())
+        .values());
     const { error } = await client_1.supabase
         .from("episode")
-        .upsert(rows, { onConflict: "drama_id,season,number" });
+        .upsert(dedupedRows, { onConflict: "drama_id,season,number" });
     if (error)
         throw error;
 }
