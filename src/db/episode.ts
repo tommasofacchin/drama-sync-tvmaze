@@ -39,17 +39,26 @@ export function mapTvmazeEpisodeToEpisodeRow(
 
 export async function upsertEpisodes(rows: EpisodeRow[]): Promise<void> {
   if (rows.length === 0) return;
-  
+
   rows.forEach((r) => {
     if (r.airdate === "" as any) {
       console.error("BUG: empty string airdate", r);
     }
   });
 
+  const dedupedRows = Array.from(
+    rows
+      .reduce((acc, row) => {
+        const key = `${row.drama_id}:${row.season}:${row.number}`;
+        acc.set(key, row);
+        return acc;
+      }, new Map<string, EpisodeRow>())
+      .values()
+  );
+
   const { error } = await supabase
     .from("episode")
-    .upsert(rows, { onConflict: "drama_id,season,number" });
+    .upsert(dedupedRows, { onConflict: "drama_id,season,number" });
 
   if (error) throw error;
 }
-
